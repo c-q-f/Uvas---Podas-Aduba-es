@@ -6,8 +6,6 @@
 <title>Granja Coemitanga — Fertilização</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -190,22 +188,6 @@ tbody td:first-child{color:var(--text1);font-weight:600}
 @media(max-width:1024px){.dash-grid{grid-template-columns:1fr}}
 @media(max-width:768px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.main{padding:14px}.header{padding:0 14px}}
 @media(max-width:480px){.kpi-grid{grid-template-columns:1fr 1fr}}
-
-/* MODAL FIREBASE */
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;pointer-events:none;transition:opacity 0.2s ease}
-.modal-overlay.show{opacity:1;pointer-events:all}
-.modal-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:24px;width:100%;max-width:560px;box-shadow:var(--shadow-lg);position:relative;animation:modalScale 0.2s ease;margin:0 16px}
-@keyframes modalScale{from{transform:scale(0.95);opacity:0}to{transform:scale(1);opacity:1}}
-.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:12px}
-.modal-title{font-size:1.1rem;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:8px}
-.modal-close{background:transparent;border:none;color:var(--text3);font-size:1.5rem;line-height:1;cursor:pointer}
-.modal-close:hover{color:var(--accent)}
-.modal-body{margin-bottom:20px;font-size:0.85rem;color:var(--text2);line-height:1.6}
-.modal-body p{margin-bottom:10px}
-.modal-body ol{margin-left:20px;margin-bottom:12px}
-.modal-body textarea{width:100%;height:140px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text1);font-family:monospace;font-size:0.78rem;resize:none;outline:none;margin-top:8px}
-.modal-body textarea:focus{border-color:var(--accent)}
-.modal-footer{display:flex;justify-content:flex-end;gap:10px}
 </style>
 </head>
 <body>
@@ -218,10 +200,6 @@ tbody td:first-child{color:var(--text1);font-weight:600}
       <div><span style="line-height:1.2">Coemitanga</span><span class="logo-sub">Fertilização · Parreiras Niágara</span></div>
     </div>
     <div class="header-actions">
-      <button class="btn btn-ghost btn-sm" id="btn-firebase-sync" style="display:flex;align-items:center;gap:6px;border-color:rgba(168,224,99,0.15)">
-        <span id="fb-status-indicator" style="width:8px;height:8px;border-radius:50%;background:#7a8c7a;display:inline-block;transition:all 0.3s"></span>
-        <span id="fb-status-text">Cloud Offline</span>
-      </button>
       <button class="btn btn-ghost btn-sm" id="btn-import-json">Importar</button>
       <button class="btn btn-ghost btn-sm" id="btn-export-json">Exportar</button>
       <button class="btn btn-danger btn-sm" id="btn-clear">Limpar</button>
@@ -334,36 +312,6 @@ tbody td:first-child{color:var(--text1);font-weight:600}
   <div id="toasts"></div>
 </div>
 
-<!-- MODAL CONFIGURAÇÃO FIREBASE -->
-<div id="modal-firebase" class="modal-overlay">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h3 class="modal-title">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        Sincronização Cloud (Firebase)
-      </h3>
-      <button class="modal-close" id="modal-fb-close">&times;</button>
-    </div>
-    <div class="modal-body">
-      <p>Conecte o painel ao seu banco de dados em nuvem para sincronizar as podas e adubações em tempo real entre múltiplos computadores.</p>
-      <p><strong>Como obter as credenciais:</strong></p>
-      <ol>
-        <li>Crie um projeto no <strong>Firebase Console</strong>.</li>
-        <li>Ative o <strong>Realtime Database</strong> (Modo de Teste ou Regras abertas).</li>
-        <li>Nas Configurações do Projeto, adicione um App Web.</li>
-        <li>Cole o código do objeto <strong>firebaseConfig</strong> no campo abaixo:</li>
-      </ol>
-      <textarea id="fb-config-input" placeholder='var firebaseConfig = {&#10;  apiKey: "...",&#10;  databaseURL: "...",&#10;  projectId: "..."&#10;};'></textarea>
-      <p style="font-size:0.75rem;color:var(--text3);margin-top:10px">Nota: Se preferir colar permanentemente no código para todos os novos usuários, você pode editar o arquivo HTML e colar as chaves na variável global <code>FIREBASE_CONFIG</code>.</p>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost btn-sm" id="btn-fb-clear-config" style="color:var(--red);border-color:rgba(248,113,113,0.2)">Desconectar Nuvem</button>
-      <button class="btn btn-ghost btn-sm" id="btn-fb-cancel">Cancelar</button>
-      <button class="btn btn-accent btn-sm" id="btn-fb-save">Salvar e Conectar</button>
-    </div>
-  </div>
-</div>
-
 <script>
 // ============================================================
 // UTILS
@@ -418,168 +366,6 @@ function ordinal(n){var s=['1\u00aa','2\u00aa','3\u00aa','4\u00aa','5\u00aa'];re
 var MONTHS=['Janeiro','Fevereiro','Mar\u00e7o','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
 // ============================================================
-// CONFIGURAÇÃO DO FIREBASE (ABORDAGEM HÍBRIDA)
-// ============================================================
-// Cole suas chaves de configuração do Firebase aqui caso deseje 
-// embuti-las permanentemente no código para novos usuários.
-var FIREBASE_CONFIG = {
-  apiKey: "AIzaSyAMj5wmMaymOZ2tnG8NpiATJlsdA_3sUR0",
-  authDomain: "uva-adubacao.firebaseapp.com",
-  databaseURL: "https://uva-adubacao-default-rtdb.firebaseio.com",
-  projectId: "uva-adubacao",
-  storageBucket: "uva-adubacao.firebasestorage.app",
-  messagingSenderId: "388220640239",
-  appId: "1:388220640239:web:ff3fba1e75e1e59dd7741a"
-};
-
-var db = null;
-var isFirebaseConnected = false;
-var firebaseListeners = [];
-
-function getFirebaseConfig() {
-  if (FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey) {
-    return FIREBASE_CONFIG;
-  }
-  try {
-    var stored = localStorage.getItem('coem_firebase_config');
-    if (stored) return JSON.parse(stored);
-  } catch (e) {}
-  return null;
-}
-
-function updateFirebaseUI() {
-  var ind = gel('fb-status-indicator');
-  var txt = gel('fb-status-text');
-  if (!ind || !txt) return;
-  var hasConfig = !!getFirebaseConfig();
-  if (db && isFirebaseConnected) {
-    ind.style.background = '#4ade80';
-    ind.style.boxShadow = '0 0 8px #4ade80';
-    txt.textContent = 'Nuvem Conectada';
-  } else if (hasConfig) {
-    ind.style.background = '#fbbf24';
-    ind.style.boxShadow = '0 0 8px #fbbf24';
-    txt.textContent = 'Conectando...';
-  } else {
-    ind.style.background = '#7a8c7a';
-    ind.style.boxShadow = 'none';
-    txt.textContent = 'Nuvem Offline';
-  }
-}
-
-function clearFirebaseListeners() {
-  for (var i = 0; i < firebaseListeners.length; i++) {
-    try {
-      firebaseListeners[i].ref.off(firebaseListeners[i].event, firebaseListeners[i].cb);
-    } catch (e) {}
-  }
-  firebaseListeners = [];
-}
-
-function uploadLocalDataToFirebase() {
-  if (!db) return;
-  var rowsToSave = ST.rows.map(function(r) {
-    return Object.assign({}, r, {
-      dataPoda: r.dataPoda.toISOString(),
-      dataAplicacao: r.dataAplicacao.toISOString()
-    });
-  });
-  db.ref("coemitanga/rows").set(rowsToSave);
-  db.ref("coemitanga/completed").set(ST.completed);
-  toast("Dados locais enviados para a Nuvem!");
-}
-
-function setupFirebaseSync() {
-  if (!db) return;
-  clearFirebaseListeners();
-  
-  var rowsRef = db.ref("coemitanga/rows");
-  var rListener = rowsRef.on("value", function(snapshot) {
-    var val = snapshot.val();
-    if (val && val.length) {
-      ST.rows = val.map(function(r) {
-        r.dataPoda = new Date(r.dataPoda);
-        r.dataAplicacao = new Date(r.dataAplicacao);
-        return r;
-      });
-      // Configurar semana inicial se nenhuma estiver ativa
-      if (!ST.selectedWeek) {
-        var weeks = [];
-        var seen = {};
-        ST.rows.forEach(function(row) {
-          if (!seen[row.semana]) {
-            seen[row.semana] = 1;
-            weeks.push(row.semana);
-          }
-        });
-        weeks.sort();
-        var tw = isoWeekKey(today());
-        ST.selectedWeek = weeks.indexOf(tw) >= 0 ? tw : (weeks.filter(function(w) { return w >= tw; })[0] || weeks[0]);
-      }
-      
-      if (gel('dashboard').style.display === 'none') {
-        initDashboard();
-      } else {
-        renderAll();
-      }
-    } else {
-      // Banco na nuvem vazio
-      if (ST.rows && ST.rows.length > 0) {
-        if (confirm("O banco em nuvem está vazio. Deseja enviar seus dados locais atuais para sincronizar?")) {
-          uploadLocalDataToFirebase();
-        }
-      }
-    }
-  });
-  firebaseListeners.push({ ref: rowsRef, event: "value", cb: rListener });
-  
-  var compRef = db.ref("coemitanga/completed");
-  var cListener = compRef.on("value", function(snapshot) {
-    var val = snapshot.val();
-    ST.completed = val || {};
-    renderKPIs();
-    renderParreira();
-    renderCalendar();
-    renderCompras();
-    renderTable();
-  });
-  firebaseListeners.push({ ref: compRef, event: "value", cb: cListener });
-}
-
-function initFirebase() {
-  clearFirebaseListeners();
-  var config = getFirebaseConfig();
-  if (!config) {
-    db = null;
-    isFirebaseConnected = false;
-    updateFirebaseUI();
-    return;
-  }
-  try {
-    if (window.firebase) {
-      if (firebase.apps.length === 0) {
-        firebase.initializeApp(config);
-      }
-      db = firebase.database();
-      
-      var infoRef = db.ref(".info/connected");
-      var infoListener = infoRef.on("value", function(snap) {
-        isFirebaseConnected = snap.val() === true;
-        updateFirebaseUI();
-      });
-      firebaseListeners.push({ ref: infoRef, event: "value", cb: infoListener });
-      
-      setupFirebaseSync();
-    }
-  } catch (e) {
-    console.error("Firebase init error:", e);
-    isFirebaseConnected = false;
-    db = null;
-    updateFirebaseUI();
-  }
-}
-
-// ============================================================
 // STORAGE
 // ============================================================
 var _mem={};
@@ -598,11 +384,7 @@ var PENDING=[];var VALLOG=[];
 function saveState(){
   store.set('coem_completed',JSON.stringify(ST.completed));
   if(ST.selectedWeek)store.set('coem_week',ST.selectedWeek);
-  if(ST.rows.length){
-    store.set('coem_rows',JSON.stringify(ST.rows.map(function(r){return Object.assign({},r,{dataPoda:r.dataPoda.toISOString(),dataAplicacao:r.dataAplicacao.toISOString()});})));
-  } else {
-    store.del('coem_rows');
-  }
+  store.set('coem_rows',JSON.stringify(ST.rows.map(function(r){return Object.assign({},r,{dataPoda:r.dataPoda.toISOString(),dataAplicacao:r.dataAplicacao.toISOString()});})));
 }
 function loadState(){
   try{var c=store.get('coem_completed');if(c)ST.completed=JSON.parse(c);var w=store.get('coem_week');if(w)ST.selectedWeek=w;var r=store.get('coem_rows');if(r){ST.rows=JSON.parse(r).map(function(row){row.dataPoda=new Date(row.dataPoda);row.dataAplicacao=new Date(row.dataAplicacao);return row;});}}catch(e){ST.completed={};ST.rows=[];}
@@ -610,9 +392,6 @@ function loadState(){
 function clearState(){
   ST={rows:[],completed:{},selectedWeek:null,calMonth:null,scopeAll:false,sort:{col:'dataAplicacao',dir:'asc'},search:'',fltStatus:'',fltFert:'',fltTipo:'',fltPodaGlobal:''};
   store.del('coem_completed');store.del('coem_week');store.del('coem_rows');
-  if(db){
-    db.ref("coemitanga").remove();
-  }
 }
 
 // ============================================================
@@ -1050,7 +829,7 @@ function renderTable(){
   var selC=0,selT=0,selRuas={};rows.forEach(function(r){if(r.fert==='Calcinit')selC+=r.gpRua;else selT+=r.gpRua;selRuas[r.rua]=1;});
   gel('tbl-footer').innerHTML='<span class="fs">'+rows.length+' registro(s) \u00b7 <strong>'+Object.keys(selRuas).length+'</strong> rua(s)</span><span class="fs">Calcinit: <strong>'+fmtQ(selC)+'</strong></span><span class="fs">TrichoPhos: <strong>'+fmtQ(selT)+'</strong></span>';
   gel('tbl-head').querySelectorAll('th[data-col]').forEach(function(th){th.addEventListener('click',function(){var c=th.dataset.col;if(ST.sort.col===c)ST.sort.dir=ST.sort.dir==='asc'?'desc':'asc';else{ST.sort.col=c;ST.sort.dir='asc';}renderTable();});});
-  gel('tbl-body').querySelectorAll('.chk').forEach(function(btn){btn.addEventListener('click',function(e){e.stopPropagation();var id=btn.dataset.id;if(ST.completed[id])delete ST.completed[id];else ST.completed[id]=true;saveState();if(db){db.ref("coemitanga/completed/"+id).set(ST.completed[id]?true:null);}else{renderKPIs();renderCompras();renderTable();renderParreira();}});});
+  gel('tbl-body').querySelectorAll('.chk').forEach(function(btn){btn.addEventListener('click',function(e){e.stopPropagation();var id=btn.dataset.id;if(ST.completed[id])delete ST.completed[id];else ST.completed[id]=true;saveState();renderKPIs();renderCompras();renderTable();});});
 }
 
 // VALIDATION REPORT
@@ -1073,21 +852,7 @@ function loadDemo(){
   var weeks=[];var seen={};ST.rows.forEach(function(r){if(!seen[r.semana]){seen[r.semana]=1;weeks.push(r.semana);}});weeks.sort();
   var tw=isoWeekKey(today());
   ST.selectedWeek=weeks.indexOf(tw)>=0?tw:(weeks.filter(function(w){return w>=tw;})[0]||weeks[0]);
-  saveState();
-  if(db){
-    var rowsToSave = ST.rows.map(function(r) {
-      return Object.assign({}, r, {
-        dataPoda: r.dataPoda.toISOString(),
-        dataAplicacao: r.dataAplicacao.toISOString()
-      });
-    });
-    db.ref("coemitanga/rows").set(rowsToSave);
-    db.ref("coemitanga/completed").set(null);
-    toast('Dados de exemplo enviados para a Nuvem!');
-  } else {
-    initDashboard();
-    toast('Dados de exemplo carregados localmente!');
-  }
+  saveState();initDashboard();toast('Dados de exemplo carregados!');
 }
 
 // ============================================================
@@ -1114,21 +879,7 @@ function init(){
     var weeks=[];var seen={};ST.rows.forEach(function(r){if(!seen[r.semana]){seen[r.semana]=1;weeks.push(r.semana);}});weeks.sort();
     var tw=isoWeekKey(today());
     ST.selectedWeek=weeks.indexOf(tw)>=0?tw:(weeks.filter(function(w){return w>=tw;})[0]||weeks[0]);
-    saveState();
-    if(db){
-      var rowsToSave = ST.rows.map(function(r) {
-        return Object.assign({}, r, {
-          dataPoda: r.dataPoda.toISOString(),
-          dataAplicacao: r.dataAplicacao.toISOString()
-        });
-      });
-      db.ref("coemitanga/rows").set(rowsToSave);
-      db.ref("coemitanga/completed").set(null);
-      toast(PENDING.length+' rua(s) importada(s) na Nuvem!');
-    } else {
-      initDashboard();
-      toast(PENDING.length+' rua(s) importada(s) localmente!');
-    }
+    saveState();initDashboard();toast(PENDING.length+' rua(s) importada(s)!');
   });
   gel('btn-cancel').addEventListener('click',function(){
     if(ST.rows.length){gel('upload-screen').style.display='none';gel('week-bar').style.display='flex';gel('dashboard').style.display='block';}
@@ -1192,83 +943,10 @@ function init(){
   gel('btn-new-upload').addEventListener('click',function(){gel('upload-screen').style.display='flex';gel('dashboard').style.display='none';gel('week-bar').style.display='none';gel('val-report').style.display='none';gel('upload-actions').style.display='none';PENDING=[];VALLOG=[];});
   gel('btn-demo').addEventListener('click',loadDemo);
 
-  // Firebase Sync Modal Events
-  var fbBtn = gel('btn-firebase-sync');
-  var fbModal = gel('modal-firebase');
-  var fbClose = gel('modal-fb-close');
-  var fbCancel = gel('btn-fb-cancel');
-  var fbSave = gel('btn-fb-save');
-  var fbClear = gel('btn-fb-clear-config');
-  var fbInput = gel('fb-config-input');
-
-  if (fbBtn && fbModal) {
-    fbBtn.addEventListener('click', function() {
-      var config = getFirebaseConfig();
-      if (config) {
-        fbInput.value = 'var firebaseConfig = ' + JSON.stringify(config, null, 2) + ';';
-      } else {
-        fbInput.value = '';
-      }
-      fbModal.classList.add('show');
-    });
-
-    var closeFbModal = function() { fbModal.classList.remove('show'); };
-    if (fbClose) fbClose.addEventListener('click', closeFbModal);
-    if (fbCancel) fbCancel.addEventListener('click', closeFbModal);
-
-    if (fbSave) {
-      fbSave.addEventListener('click', function() {
-        var code = fbInput.value.trim();
-        if (!code) {
-          toast('Por favor, cole as configurações do Firebase.');
-          return;
-        }
-        
-        var match = code.match(/\{[\s\S]*\}/);
-        if (!match) {
-          toast('Formato de configuração inválido. Certifique-se de incluir as chaves { ... }');
-          return;
-        }
-        
-        try {
-          var parsedObj = new Function('return ' + match[0])();
-          if (!parsedObj.apiKey || !parsedObj.databaseURL) {
-            toast('A configuração deve conter pelo menos apiKey e databaseURL.');
-            return;
-          }
-          
-          localStorage.setItem('coem_firebase_config', JSON.stringify(parsedObj));
-          closeFbModal();
-          initFirebase();
-          toast('Configuração do Firebase salva com sucesso!');
-        } catch (e) {
-          toast('Erro ao processar o código: ' + e.message);
-        }
-      });
-    }
-
-    if (fbClear) {
-      fbClear.addEventListener('click', function() {
-        if (confirm('Deseja realmente desconectar e remover as configurações do Firebase?')) {
-          localStorage.removeItem('coem_firebase_config');
-          clearFirebaseListeners();
-          db = null;
-          isFirebaseConnected = false;
-          updateFirebaseUI();
-          closeFbModal();
-          toast('Configuração removida. Painel em modo local.');
-        }
-      });
-    }
-  }
-
   loadState();
-  initFirebase();
   if(ST.rows&&ST.rows.length){
     if(!ST.selectedWeek){var weeks=[];var seen={};ST.rows.forEach(function(r){if(!seen[r.semana]){seen[r.semana]=1;weeks.push(r.semana);}});weeks.sort();var tw=isoWeekKey(today());ST.selectedWeek=weeks.indexOf(tw)>=0?tw:(weeks.filter(function(w){return w>=tw;})[0]||weeks[0]);}
-    if (!getFirebaseConfig()) {
-      initDashboard();
-    }
+    initDashboard();
   }
 }
 document.addEventListener('DOMContentLoaded',init);
