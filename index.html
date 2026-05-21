@@ -497,6 +497,11 @@ function setupFirebaseSync() {
   var rListener = rowsRef.on("value", function(snapshot) {
     var val = snapshot.val();
     if (val && val.length) {
+      // Dados recebidos com sucesso = conexão confirmada
+      if (!isFirebaseConnected) {
+        isFirebaseConnected = true;
+        updateFirebaseUI();
+      }
       ST.rows = val.map(function(r) {
         r.dataPoda = new Date(r.dataPoda);
         r.dataAplicacao = new Date(r.dataAplicacao);
@@ -1266,9 +1271,23 @@ function init(){
   initFirebase();
   if(ST.rows&&ST.rows.length){
     if(!ST.selectedWeek){var weeks=[];var seen={};ST.rows.forEach(function(r){if(!seen[r.semana]){seen[r.semana]=1;weeks.push(r.semana);}});weeks.sort();var tw=isoWeekKey(today());ST.selectedWeek=weeks.indexOf(tw)>=0?tw:(weeks.filter(function(w){return w>=tw;})[0]||weeks[0]);}
-    if (!getFirebaseConfig()) {
-      initDashboard();
-    }
+    // Abre o dashboard imediatamente com dados locais;
+    // o Firebase sincronizará em background quando conectar
+    initDashboard();
+  }
+  // Retry automático: se após 4s ainda não conectou, tenta novamente
+  if (getFirebaseConfig()) {
+    setTimeout(function() {
+      if (!isFirebaseConnected) {
+        initFirebase();
+      }
+    }, 4000);
+    // Segundo retry aos 10s como fallback
+    setTimeout(function() {
+      if (!isFirebaseConnected) {
+        initFirebase();
+      }
+    }, 10000);
   }
 }
 document.addEventListener('DOMContentLoaded',init);
